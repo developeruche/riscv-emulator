@@ -1,0 +1,14 @@
+[workspace]
+
+
+members = [
+    "bins/*",
+    "crates/*",
+]
+
+
+
+[workspace.dependencies]
+core = { path = "crates/core" }
+anyhow = "1.0.93"
+hashbrown = "0.14.5"
