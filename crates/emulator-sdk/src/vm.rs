@@ -10,6 +10,9 @@ use std::{
 #[derive(Debug, Clone)]
 pub enum VMErrors {
     InvalidInstruction,
+    InvalidMemoryAccess,
+    EnvironmentError,
+    InvalidOpcode,
 }
 
 #[derive(Debug, Clone)]
@@ -66,10 +69,20 @@ impl Vm {
         let instruction = self
             .memory
             .read_mem(self.pc, MemoryChuckSize::WORD_SIZE)
-            .ok_or(VMErrors::InvalidInstruction)?;
+            .ok_or(VMErrors::InvalidMemoryAccess)?;
 
         // Decode the instruction
-        let decoded_instruction = InstructionDecoder::decode(&instruction);
+        let decoded_instruction = InstructionDecoder::decode(&instruction)?;
+
+        // Execute the instruction
+        match decoded_instruction.decoded_instruction {
+            crate::instructions::DecodedInstruction::RType(rtype) => {}
+            crate::instructions::DecodedInstruction::IType(itype) => {}
+            crate::instructions::DecodedInstruction::SType(stype) => {}
+            crate::instructions::DecodedInstruction::BType(btype) => {}
+            crate::instructions::DecodedInstruction::UType(utype) => {}
+            crate::instructions::DecodedInstruction::JType(jtype) => {}
+        }
 
         Ok(true)
     }
@@ -80,7 +93,19 @@ impl Vm {
     pub fn run(&mut self) {
         self.running = true;
         while self.running {
-            self.step();
+            match self.step() {
+                Ok(true) => continue,
+                Ok(false) => break,
+                Err(e) => {
+                    match e {
+                        VMErrors::EnvironmentError => {} // would just be halting the program, sysytem calls are not allowed on the VM
+                        _ => {
+                            eprintln!("Error at pc: {:x}", self.pc);
+                        }
+                    }
+                    self.running = false;
+                }
+            }
         }
     }
 }

@@ -7,9 +7,9 @@ pub const WORD_SIZE: usize = 4;
 /// This is the maximum memory size for this vm
 pub const MAXIMUM_MEMORY_SIZE: u32 = u32::MAX;
 /// This is the size of the half word of the VM
-const HALF_WORD: usize = 2;
+pub const HALF_WORD: usize = 2;
 /// This is the size of a byte in the VM
-const BYTE: usize = 1;
+pub const BYTE: usize = 1;
 
 /// This defines the different chuck of memory that can be read or written to
 pub enum MemoryChuckSize {

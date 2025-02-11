@@ -1,3 +1,5 @@
+use crate::vm::VMErrors;
+
 #[derive(Debug, Clone, PartialEq)]
 pub struct RType {
     pub funct7: u32,
@@ -166,58 +168,54 @@ pub struct InstructionDecoder {
 }
 
 impl InstructionDecoder {
-    pub fn decode(instruction: &u32) -> Self {
+    pub fn decode(instruction: &u32) -> Result<Self, VMErrors> {
         let opcode = instruction & 0x7f;
 
         match opcode {
             REGISTER_CLASS => {
                 let decoded_instruction = DecodedInstruction::RType(RType::new(*instruction));
-                return Self {
+                return Ok(Self {
                     decoded_instruction,
-                };
+                });
             }
             IMMEDIATE_CLASS | IMMEDIATE_LOAD_CLASS => {
                 let decoded_instruction = DecodedInstruction::IType(IType::new(*instruction));
-                return Self {
+                return Ok(Self {
                     decoded_instruction,
-                };
+                });
             }
             STORE_CLASS => {
                 let decoded_instruction = DecodedInstruction::SType(SType::new(*instruction));
-                return Self {
+                return Ok(Self {
                     decoded_instruction,
-                };
+                });
             }
             BRANCH_CLASS => {
                 let decoded_instruction = DecodedInstruction::BType(BType::new(*instruction));
-                return Self {
+                return Ok(Self {
                     decoded_instruction,
-                };
+                });
             }
             JAL_CLASS => {
                 let decoded_instruction = DecodedInstruction::JType(JType::new(*instruction));
-                return Self {
+                return Ok(Self {
                     decoded_instruction,
-                };
+                });
             }
             JALR_CLASS => {
                 let decoded_instruction = DecodedInstruction::IType(IType::new(*instruction));
-                return Self {
+                return Ok(Self {
                     decoded_instruction,
-                };
+                });
             }
             UPPER_IMMEDIATE_CLASS => {
                 let decoded_instruction = DecodedInstruction::UType(UType::new(*instruction));
-                return Self {
+                return Ok(Self {
                     decoded_instruction,
-                };
+                });
             }
-            ENVIRONMENT_CLASS => {
-                unimplemented!("Environment class not implemented... this is a VM :(")
-            }
-            _ => {
-                unimplemented!()
-            }
+            ENVIRONMENT_CLASS => Err(VMErrors::EnvironmentError),
+            _ => Err(VMErrors::InvalidOpcode),
         }
     }
 }
