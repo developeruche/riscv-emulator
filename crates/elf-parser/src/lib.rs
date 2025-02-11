@@ -4,18 +4,15 @@
 //! this code was copied from SP1 codebase's implementation of the ELF parser.
 //! see: [code](https://github.com/succinctlabs/sp1/blob/dev/crates/core/executor/src/disassembler/elf.rs)
 
-
-use core::{WORD_SIZE, MAXIMUM_MEMORY_SIZE};
+use core::{MAXIMUM_MEMORY_SIZE, WORD_SIZE};
 use elf::{
     abi::{EM_RISCV, ET_EXEC, PF_X, PT_LOAD},
     endian::LittleEndian,
     file::Class,
     ElfBytes,
 };
-use std::cmp::min;
 use hashbrown::HashMap;
-
-
+use std::cmp::min;
 
 /// RISC-V 32IM ELF (Executable and Linkable Format) File.
 ///
@@ -38,7 +35,6 @@ pub struct Elf {
     pub memory_image: HashMap<u32, u32>,
 }
 
-
 impl Elf {
     /// Create a new [Elf].
     pub fn new(
@@ -54,7 +50,7 @@ impl Elf {
             memory_image,
         }
     }
-    
+
     /// Parse the ELF file into a vector of 32-bit encoded instructions and the first memory
     /// address.
     ///
@@ -75,17 +71,19 @@ impl Elf {
         } else if elf.ehdr.e_type != ET_EXEC {
             anyhow::bail!("must be executable");
         }
-        
+
         // Get the entrypoint of the ELF file as an u32.
-        let entry: u32 = elf.ehdr.e_entry.try_into()?; 
-        
+        let entry: u32 = elf.ehdr.e_entry.try_into()?;
+
         // Make sure the entrypoint is valid.
         if entry == MAXIMUM_MEMORY_SIZE || entry % WORD_SIZE as u32 != 0 {
             anyhow::bail!("invalid entrypoint");
         }
-        
+
         // Get the segments of the ELF file.
-        let segments = elf.segments().ok_or_else(|| anyhow::anyhow!("failed to get segments"))?;
+        let segments = elf
+            .segments()
+            .ok_or_else(|| anyhow::anyhow!("failed to get segments"))?;
         if segments.len() > 256 {
             anyhow::bail!("too many program headers");
         }
@@ -124,7 +122,9 @@ impl Elf {
 
             // Read the segment and decode each word as an instruction.
             for i in (0..mem_size).step_by(WORD_SIZE) {
-                let addr = vaddr.checked_add(i).ok_or_else(|| anyhow::anyhow!("vaddr overflow"))?;
+                let addr = vaddr
+                    .checked_add(i)
+                    .ok_or_else(|| anyhow::anyhow!("vaddr overflow"))?;
                 if addr == MAXIMUM_MEMORY_SIZE {
                     anyhow::bail!(
                         "address [0x{addr:08x}] exceeds maximum address for guest programs [0x{MAXIMUM_MEMORY_SIZE:08x}]"
@@ -157,4 +157,3 @@ impl Elf {
         Ok(Elf::new(instructions, entry, base_address, image))
     }
 }
-
