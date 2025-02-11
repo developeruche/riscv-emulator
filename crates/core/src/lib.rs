@@ -29,12 +29,54 @@ pub struct Registers {
 }
 
 impl MemoryInterface for Memory {
-    fn read_mem(&self, addr: u32, size: MemoryChuckSize) -> u32 {
-        unimplemented!()
+    fn read_mem(&self, addr: u32, size: MemoryChuckSize) -> Option<u32> {
+        // Calculate a mask and shift to apply to a 32-bit word to get the required data
+        let (shift, mask) = match size {
+            MemoryChuckSize::BYTE => (addr & 0x3, 0xff),
+            MemoryChuckSize::HALF_WORD => (addr & 0x2, 0xffff),
+            MemoryChuckSize::WORD_SIZE => (0, 0xffffffff),
+        };
+
+        if (addr & 0x3) != shift {
+            panic!("Memory read must be aligned");
+        }
+
+        // Calculate vector index required data is contained in
+        let word_addr = addr >> 2;
+
+        // Read data from vector
+        let read_data = self.memory.get(word_addr as usize).copied()?;
+
+        // Apply mask and shift to extract required data from word
+        Some((read_data >> (shift * 8)) & mask)
     }
 
-    fn write_word(&mut self, addr: u32, size: MemoryChuckSize, value: u32) {
-        unimplemented!()
+    fn write_word(&mut self, addr: u32, size: MemoryChuckSize, value: u32) -> bool {
+        // Calculate a mask and shift needed to update 32-bit word
+        let (shift, mask) = match size {
+            MemoryChuckSize::BYTE => (addr & 0x3, 0xff),
+            MemoryChuckSize::HALF_WORD => (addr & 0x2, 0xffff),
+            MemoryChuckSize::WORD_SIZE => (0, 0xffffffff),
+        };
+
+        if (addr & 0x3) != shift {
+            panic!("Memory write must be aligned");
+        }
+
+        // `mask` << (shift * 8) gives bits being updated, invert to get bits not being updated
+        let write_mask = !(mask << (shift * 8));
+
+        // Calculate vector index data to update is contained in
+        let word_addr = (addr >> 2) as usize;
+
+        if let Some(update_data) = self.memory.get(word_addr) {
+            // Update word with store data, if it exists
+            let new = (update_data & write_mask) | ((value & mask) << (shift * 8));
+            self.memory[word_addr] = new;
+            true
+        } else {
+            false
+        }
     }
 }
 
