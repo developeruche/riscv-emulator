@@ -106,10 +106,10 @@ impl Memory {
     }
 
     pub fn load_program(&mut self, program: &Vec<u32>, base_addr: u32) {
-        let mut addr = base_addr as usize;
+        let mut addr = (base_addr >> 2) as usize;
 
-        for byte in program {
-            self.memory[addr] = *byte;
+        for word in program {
+            self.memory[addr] = *word;
             addr += 1;
         }
     }

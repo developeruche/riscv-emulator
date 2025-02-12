@@ -74,6 +74,8 @@ impl Vm {
         // Decode the instruction
         let decoded_instruction = InstructionDecoder::decode(&instruction)?;
 
+        println!("Decoded Inst: {:?}", decoded_instruction);
+
         // Execute the instruction
         match decoded_instruction.decoded_instruction {
             crate::instructions::DecodedInstruction::RType(rtype) => {
@@ -341,14 +343,12 @@ impl Vm {
                 match decoded_instruction.opcode {
                     0b1101111 => {
                         // Funct3 for jal
-                        // todo!()
+                        todo!()
                     }
                     _ => return Err(VMErrors::InvalidOpcode),
                 }
             }
         }
-
-        Ok(true)
     }
 
     /// Run the Vm.
@@ -364,7 +364,7 @@ impl Vm {
                     match e {
                         VMErrors::EnvironmentError => {} // would just be halting the program, sysytem calls are not allowed on the VM
                         _ => {
-                            eprintln!("Error at pc: {:x}", self.pc);
+                            eprintln!("Error at pc: {:x} - error: {:?}", self.pc, e);
                         }
                     }
                     self.running = false;
