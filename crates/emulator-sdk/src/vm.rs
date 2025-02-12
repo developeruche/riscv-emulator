@@ -1,6 +1,6 @@
 //! This mod holds all the necessary structs and functions to emulate a RISC-V CPU.
 use crate::instructions::InstructionDecoder;
-use core::{interfaces::MemoryInterface, Memory, MemoryChuckSize, Registers};
+use core::{interfaces::MemoryInterface, sign_extend_u32, Memory, MemoryChuckSize, Registers};
 use elf_parser::Elf;
 use std::{
     fs::File,
@@ -118,11 +118,23 @@ impl Vm {
                         match rtype.funct7 {
                             0b0000000 => {
                                 // Funct7 for sll
-                                todo!()
+                                let rs1 = self.registers.read_reg(rtype.rs1 as u32);
+                                let rs2 = self.registers.read_reg(rtype.rs2 as u32);
+                                let rd = rs1.wrapping_shl(rs2);
+                                self.registers.write_reg(rtype.rd as u32, rd);
+                                self.pc += 4;
+                                Ok(true)
                             }
                             0b0000001 => {
                                 // Funct7 for mulh
-                                todo!()
+                                let rs1 =
+                                    sign_extend_u32(self.registers.read_reg(rtype.rs1 as u32));
+                                let rs2 =
+                                    sign_extend_u32(self.registers.read_reg(rtype.rs2 as u32));
+                                let rd = (rs1.wrapping_mul(rs2) >> 32) as u32;
+                                self.registers.write_reg(rtype.rd as u32, rd);
+                                self.pc += 4;
+                                Ok(true)
                             }
                             _ => return Err(VMErrors::InvalidOpcode),
                         }
@@ -132,11 +144,22 @@ impl Vm {
                         match rtype.funct7 {
                             0b0000000 => {
                                 // Funct7 for slt
-                                todo!()
+                                let rs1 = self.registers.read_reg(rtype.rs1 as u32) as i32;
+                                let rs2 = self.registers.read_reg(rtype.rs2 as u32) as i32;
+                                let rd = if rs1 < rs2 { 1 } else { 0 };
+                                self.registers.write_reg(rtype.rd as u32, rd);
+                                self.pc += 4;
+                                Ok(true)
                             }
                             0b0000001 => {
                                 // Funct7 for mulhsu
-                                todo!()
+                                let rs1 =
+                                    sign_extend_u32(self.registers.read_reg(rtype.rs1 as u32));
+                                let rs2 = self.registers.read_reg(rtype.rs2 as u32) as i64;
+                                let rd = (rs1.wrapping_mul(rs2) >> 32) as u32;
+                                self.registers.write_reg(rtype.rd as u32, rd);
+                                self.pc += 4;
+                                Ok(true)
                             }
                             _ => return Err(VMErrors::InvalidOpcode),
                         }
@@ -146,11 +169,21 @@ impl Vm {
                         match rtype.funct7 {
                             0b0000000 => {
                                 // Funct7 for sltu
-                                todo!()
+                                let rs1 = self.registers.read_reg(rtype.rs1 as u32);
+                                let rs2 = self.registers.read_reg(rtype.rs2 as u32);
+                                let rd = if rs1 < rs2 { 1 } else { 0 };
+                                self.registers.write_reg(rtype.rd as u32, rd);
+                                self.pc += 4;
+                                Ok(true)
                             }
                             0b0000001 => {
                                 // Funct7 for mulhu
-                                todo!()
+                                let rs1 = self.registers.read_reg(rtype.rs1 as u32) as u64;
+                                let rs2 = self.registers.read_reg(rtype.rs2 as u32) as u64;
+                                let rd = (rs1.wrapping_mul(rs2) >> 32) as u32;
+                                self.registers.write_reg(rtype.rd as u32, rd);
+                                self.pc += 4;
+                                Ok(true)
                             }
                             _ => return Err(VMErrors::InvalidOpcode),
                         }
@@ -160,11 +193,25 @@ impl Vm {
                         match rtype.funct7 {
                             0b0000000 => {
                                 // Funct7 for xor
-                                todo!()
+                                let rs1 = self.registers.read_reg(rtype.rs1 as u32);
+                                let rs2 = self.registers.read_reg(rtype.rs2 as u32);
+                                let rd = rs1 ^ rs2;
+                                self.registers.write_reg(rtype.rd as u32, rd);
+                                self.pc += 4;
+                                Ok(true)
                             }
                             0b0000001 => {
                                 // Funct7 for div
-                                todo!()
+                                let rs1 = self.registers.read_reg(rtype.rs1 as u32) as i32;
+                                let rs2 = self.registers.read_reg(rtype.rs2 as u32) as i32;
+                                let rd = if rs2 != 0 {
+                                    rs1.wrapping_div(rs2) as u32
+                                } else {
+                                    u32::MAX
+                                };
+                                self.registers.write_reg(rtype.rd as u32, rd);
+                                self.pc += 4;
+                                Ok(true)
                             }
                             _ => return Err(VMErrors::InvalidOpcode),
                         }
@@ -174,15 +221,30 @@ impl Vm {
                         match rtype.funct7 {
                             0b0000000 => {
                                 // Funct7 for srl
-                                todo!()
+                                let rs1 = self.registers.read_reg(rtype.rs1 as u32);
+                                let rs2 = self.registers.read_reg(rtype.rs2 as u32);
+                                let rd = rs1.wrapping_shr(rs2);
+                                self.registers.write_reg(rtype.rd as u32, rd);
+                                self.pc += 4;
+                                Ok(true)
                             }
                             0b0000001 => {
                                 // Funct7 for divu
-                                todo!()
+                                let rs1 = self.registers.read_reg(rtype.rs1 as u32);
+                                let rs2 = self.registers.read_reg(rtype.rs2 as u32);
+                                let rd = if rs2 != 0 { rs1 / rs2 } else { u32::MAX };
+                                self.registers.write_reg(rtype.rd as u32, rd);
+                                self.pc += 4;
+                                Ok(true)
                             }
                             0b0100000 => {
                                 // Funct7 for sra
-                                todo!()
+                                let rs1 = self.registers.read_reg(rtype.rs1 as u32) as i32;
+                                let rs2 = self.registers.read_reg(rtype.rs2 as u32) as u32;
+                                let rd = rs1.wrapping_shr(rs2) as u32;
+                                self.registers.write_reg(rtype.rd as u32, rd);
+                                self.pc += 4;
+                                Ok(true)
                             }
                             _ => return Err(VMErrors::InvalidOpcode),
                         }
@@ -192,11 +254,25 @@ impl Vm {
                         match rtype.funct7 {
                             0b0000000 => {
                                 // Funct7 for or
-                                todo!()
+                                let rs1 = self.registers.read_reg(rtype.rs1 as u32);
+                                let rs2 = self.registers.read_reg(rtype.rs2 as u32);
+                                let rd = rs1 | rs2;
+                                self.registers.write_reg(rtype.rd as u32, rd);
+                                self.pc += 4;
+                                Ok(true)
                             }
                             0b0000001 => {
                                 // Funct7 for rem
-                                todo!()
+                                let rs1 = self.registers.read_reg(rtype.rs1 as u32) as i32;
+                                let rs2 = self.registers.read_reg(rtype.rs2 as u32) as i32;
+                                let rd = if rs2 != 0 {
+                                    rs1.wrapping_rem(rs2) as u32
+                                } else {
+                                    rs1 as u32
+                                };
+                                self.registers.write_reg(rtype.rd as u32, rd);
+                                self.pc += 4;
+                                Ok(true)
                             }
                             _ => return Err(VMErrors::InvalidOpcode),
                         }
@@ -206,11 +282,21 @@ impl Vm {
                         match rtype.funct7 {
                             0b0000000 => {
                                 // Funct7 for and
-                                todo!()
+                                let rs1 = self.registers.read_reg(rtype.rs1 as u32);
+                                let rs2 = self.registers.read_reg(rtype.rs2 as u32);
+                                let rd = rs1 & rs2;
+                                self.registers.write_reg(rtype.rd as u32, rd);
+                                self.pc += 4;
+                                Ok(true)
                             }
                             0b0000001 => {
                                 // Funct7 for remu
-                                todo!()
+                                let rs1 = self.registers.read_reg(rtype.rs1 as u32);
+                                let rs2 = self.registers.read_reg(rtype.rs2 as u32);
+                                let rd = if rs2 != 0 { rs1 % rs2 } else { rs1 };
+                                self.registers.write_reg(rtype.rd as u32, rd);
+                                self.pc += 4;
+                                Ok(true)
                             }
                             _ => return Err(VMErrors::InvalidOpcode),
                         }

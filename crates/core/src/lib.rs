@@ -121,3 +121,7 @@ impl Memory {
         memory
     }
 }
+
+pub fn sign_extend_u32(x: u32) -> i64 {
+    (x as i32) as i64
+}
