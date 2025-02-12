@@ -85,15 +85,30 @@ impl Vm {
                         match rtype.funct7 {
                             0b0000000 => {
                                 // Funct7 for add
-                                todo!()
+                                let rs1 = self.registers.read_reg(rtype.rs1 as u32);
+                                let rs2 = self.registers.read_reg(rtype.rs2 as u32);
+                                let rd = rs1.wrapping_add(rs2);
+                                self.registers.write_reg(rtype.rd as u32, rd);
+                                self.pc += 4;
+                                Ok(true)
                             }
                             0b0100000 => {
                                 // Funct7 for sub
-                                todo!()
+                                let rs1 = self.registers.read_reg(rtype.rs1 as u32);
+                                let rs2 = self.registers.read_reg(rtype.rs2 as u32);
+                                let rd = rs1.wrapping_sub(rs2);
+                                self.registers.write_reg(rtype.rd as u32, rd);
+                                self.pc += 4;
+                                Ok(true)
                             }
                             0b0000001 => {
                                 // Funct7 for mul
-                                todo!()
+                                let rs1 = self.registers.read_reg(rtype.rs1 as u32);
+                                let rs2 = self.registers.read_reg(rtype.rs2 as u32);
+                                let rd = rs1.wrapping_mul(rs2);
+                                self.registers.write_reg(rtype.rd as u32, rd);
+                                self.pc += 4;
+                                Ok(true)
                             }
                             _ => return Err(VMErrors::InvalidOpcode),
                         }
