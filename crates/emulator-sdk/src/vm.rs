@@ -76,7 +76,30 @@ impl Vm {
 
         // Execute the instruction
         match decoded_instruction.decoded_instruction {
-            crate::instructions::DecodedInstruction::RType(rtype) => {}
+            crate::instructions::DecodedInstruction::RType(rtype) => {
+                match rtype.funct3 {
+                    0b000 => {
+                        // Funct3 for add, sub, mul
+                        match rtype.funct7 {
+                            0b0000000 => {
+                                // Funct7 for add
+                                todo!()
+                            }
+                            0b0100000 => {
+                                // Funct7 for sub
+                                todo!()
+                            }
+                            0b0000001 => {
+                                // Funct7 for mul
+                                todo!()
+                            }
+                            _ => return Err(VMErrors::InvalidOpcode),
+                        }
+                    }
+
+                    _ => return Err(VMErrors::InvalidOpcode),
+                }
+            }
             crate::instructions::DecodedInstruction::IType(itype) => {}
             crate::instructions::DecodedInstruction::SType(stype) => {}
             crate::instructions::DecodedInstruction::BType(btype) => {}

@@ -152,19 +152,20 @@ pub enum DecodedInstruction {
     JType(JType),
 }
 
-pub const REGISTER_CLASS: u32 = 0b0110011;
-pub const IMMEDIATE_CLASS: u32 = 0b0010011;
-pub const IMMEDIATE_LOAD_CLASS: u32 = 0b0000011;
-pub const STORE_CLASS: u32 = 0b0100011;
-pub const BRANCH_CLASS: u32 = 0b1100011;
-pub const JAL_CLASS: u32 = 0b1101111;
-pub const JALR_CLASS: u32 = 0b1100111;
-pub const UPPER_IMMEDIATE_CLASS: u32 = 0b0110111;
-pub const ENVIRONMENT_CLASS: u32 = 0b1110011;
+pub const REGISTER_CLASS: u32 = 0b0110011; // r
+pub const IMMEDIATE_CLASS: u32 = 0b0010011; // i
+pub const IMMEDIATE_LOAD_CLASS: u32 = 0b0000011; // i
+pub const STORE_CLASS: u32 = 0b0100011; // s
+pub const BRANCH_CLASS: u32 = 0b1100011; // b
+pub const JAL_CLASS: u32 = 0b1101111; // j
+pub const JALR_CLASS: u32 = 0b1100111; // i
+pub const UPPER_IMMEDIATE_CLASS: u32 = 0b0110111; // u
+pub const ENVIRONMENT_CLASS: u32 = 0b1110011; // i
 
 #[derive(Debug, Clone)]
 pub struct InstructionDecoder {
     pub decoded_instruction: DecodedInstruction,
+    pub opcode: u32,
 }
 
 impl InstructionDecoder {
@@ -176,42 +177,42 @@ impl InstructionDecoder {
                 let decoded_instruction = DecodedInstruction::RType(RType::new(*instruction));
                 return Ok(Self {
                     decoded_instruction,
+                    opcode,
                 });
             }
-            IMMEDIATE_CLASS | IMMEDIATE_LOAD_CLASS => {
+            IMMEDIATE_CLASS | IMMEDIATE_LOAD_CLASS | JALR_CLASS => {
                 let decoded_instruction = DecodedInstruction::IType(IType::new(*instruction));
                 return Ok(Self {
                     decoded_instruction,
+                    opcode,
                 });
             }
             STORE_CLASS => {
                 let decoded_instruction = DecodedInstruction::SType(SType::new(*instruction));
                 return Ok(Self {
                     decoded_instruction,
+                    opcode,
                 });
             }
             BRANCH_CLASS => {
                 let decoded_instruction = DecodedInstruction::BType(BType::new(*instruction));
                 return Ok(Self {
                     decoded_instruction,
+                    opcode,
                 });
             }
             JAL_CLASS => {
                 let decoded_instruction = DecodedInstruction::JType(JType::new(*instruction));
                 return Ok(Self {
                     decoded_instruction,
-                });
-            }
-            JALR_CLASS => {
-                let decoded_instruction = DecodedInstruction::IType(IType::new(*instruction));
-                return Ok(Self {
-                    decoded_instruction,
+                    opcode,
                 });
             }
             UPPER_IMMEDIATE_CLASS => {
                 let decoded_instruction = DecodedInstruction::UType(UType::new(*instruction));
                 return Ok(Self {
                     decoded_instruction,
+                    opcode,
                 });
             }
             ENVIRONMENT_CLASS => Err(VMErrors::EnvironmentError),
