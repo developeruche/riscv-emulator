@@ -96,6 +96,108 @@ impl Vm {
                             _ => return Err(VMErrors::InvalidOpcode),
                         }
                     }
+                    0b001 => {
+                        // Funct3 for sll, mulh
+                        match rtype.funct7 {
+                            0b0000000 => {
+                                // Funct7 for sll
+                                todo!()
+                            }
+                            0b0000001 => {
+                                // Funct7 for mulh
+                                todo!()
+                            }
+                            _ => return Err(VMErrors::InvalidOpcode),
+                        }
+                    }
+                    0b010 => {
+                        // Funct3 for slt, mulhsu
+                        match rtype.funct7 {
+                            0b0000000 => {
+                                // Funct7 for slt
+                                todo!()
+                            }
+                            0b0000001 => {
+                                // Funct7 for mulhsu
+                                todo!()
+                            }
+                            _ => return Err(VMErrors::InvalidOpcode),
+                        }
+                    }
+                    0b011 => {
+                        // Funct3 for sltu, mulhu
+                        match rtype.funct7 {
+                            0b0000000 => {
+                                // Funct7 for sltu
+                                todo!()
+                            }
+                            0b0000001 => {
+                                // Funct7 for mulhu
+                                todo!()
+                            }
+                            _ => return Err(VMErrors::InvalidOpcode),
+                        }
+                    }
+                    0b100 => {
+                        // Funct3 for xor, div
+                        match rtype.funct7 {
+                            0b0000000 => {
+                                // Funct7 for xor
+                                todo!()
+                            }
+                            0b0000001 => {
+                                // Funct7 for div
+                                todo!()
+                            }
+                            _ => return Err(VMErrors::InvalidOpcode),
+                        }
+                    }
+                    0b101 => {
+                        // Funct3 for srl, sra, divu
+                        match rtype.funct7 {
+                            0b0000000 => {
+                                // Funct7 for srl
+                                todo!()
+                            }
+                            0b0000001 => {
+                                // Funct7 for divu
+                                todo!()
+                            }
+                            0b0100000 => {
+                                // Funct7 for sra
+                                todo!()
+                            }
+                            _ => return Err(VMErrors::InvalidOpcode),
+                        }
+                    }
+                    0b110 => {
+                        // Funct3 for or, rem
+                        match rtype.funct7 {
+                            0b0000000 => {
+                                // Funct7 for or
+                                todo!()
+                            }
+                            0b0000001 => {
+                                // Funct7 for rem
+                                todo!()
+                            }
+                            _ => return Err(VMErrors::InvalidOpcode),
+                        }
+                    }
+                    0b111 => {
+                        // Funct3 for and, remu
+                        match rtype.funct7 {
+                            0b0000000 => {
+                                // Funct7 for and
+                                todo!()
+                            }
+                            0b0000001 => {
+                                // Funct7 for remu
+                                todo!()
+                            }
+                            _ => return Err(VMErrors::InvalidOpcode),
+                        }
+                    }
 
                     _ => return Err(VMErrors::InvalidOpcode),
                 }
