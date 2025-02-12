@@ -202,11 +202,150 @@ impl Vm {
                     _ => return Err(VMErrors::InvalidOpcode),
                 }
             }
-            crate::instructions::DecodedInstruction::IType(itype) => {}
-            crate::instructions::DecodedInstruction::SType(stype) => {}
-            crate::instructions::DecodedInstruction::BType(btype) => {}
-            crate::instructions::DecodedInstruction::UType(utype) => {}
-            crate::instructions::DecodedInstruction::JType(jtype) => {}
+            crate::instructions::DecodedInstruction::IType(itype) => {
+                match decoded_instruction.opcode {
+                    0b0010011 => {
+                        // Funct3 for addi, slti, sltiu, xori, ori, andi
+                        match itype.funct3 {
+                            0b000 => {
+                                // Funct3 for addi
+                                todo!()
+                            }
+                            0b010 => {
+                                // Funct3 for slti
+                                todo!()
+                            }
+                            0b011 => {
+                                // Funct3 for sltiu
+                                todo!()
+                            }
+                            0b100 => {
+                                // Funct3 for xori
+                                todo!()
+                            }
+                            0b101 => {
+                                // Funct3 for srli, srai
+                                todo!()
+                            }
+                            0b110 => {
+                                // Funct3 for ori
+                                todo!()
+                            }
+                            0b111 => {
+                                // Funct3 for andi
+                                todo!()
+                            }
+                            _ => return Err(VMErrors::InvalidOpcode),
+                        }
+                    }
+                    0b0000011 => {
+                        // Funct3 for lb, lh, lw, lbu, lhu
+                        match itype.funct3 {
+                            0b000 => {
+                                // Funct3 for lb
+                                todo!()
+                            }
+                            0b001 => {
+                                // Funct3 for lh
+                                todo!()
+                            }
+                            0b010 => {
+                                // Funct3 for lw
+                                todo!()
+                            }
+                            0b100 => {
+                                // Funct3 for lbu
+                                todo!()
+                            }
+                            0b101 => {
+                                // Funct3 for lhu
+                                todo!()
+                            }
+                            _ => return Err(VMErrors::InvalidOpcode),
+                        }
+                    }
+                    0b1100111 => {
+                        // Funct3 for jalr
+                        match itype.funct3 {
+                            0b000 => {
+                                // Funct3 for jalr
+                                todo!()
+                            }
+                            _ => return Err(VMErrors::InvalidOpcode),
+                        }
+                    }
+                    // not handling enviroment calls because it is halted during encoding
+                    _ => return Err(VMErrors::InvalidOpcode),
+                }
+            }
+            crate::instructions::DecodedInstruction::SType(stype) => {
+                match stype.funct3 {
+                    0b000 => {
+                        // Funct3 for sb
+                        todo!()
+                    }
+                    0b001 => {
+                        // Funct3 for sh
+                        todo!()
+                    }
+                    0b010 => {
+                        // Funct3 for sw
+                        todo!()
+                    }
+                    _ => return Err(VMErrors::InvalidOpcode),
+                }
+            }
+            crate::instructions::DecodedInstruction::BType(btype) => {
+                match btype.funct3 {
+                    0b000 => {
+                        // Funct3 for beq
+                        todo!()
+                    }
+                    0b001 => {
+                        // Funct3 for bne
+                        todo!()
+                    }
+                    0b100 => {
+                        // Funct3 for blt
+                        todo!()
+                    }
+                    0b101 => {
+                        // Funct3 for bge
+                        todo!()
+                    }
+                    0b110 => {
+                        // Funct3 for bltu
+                        todo!()
+                    }
+                    0b111 => {
+                        // Funct3 for bgeu
+                        todo!()
+                    }
+                    _ => return Err(VMErrors::InvalidOpcode),
+                }
+            }
+            crate::instructions::DecodedInstruction::UType(utype) => {
+                match decoded_instruction.opcode {
+                    0b0110111 => {
+                        // Funct3 for lui
+                        todo!()
+                    }
+                    0b0010111 => {
+                        // Funct3 for auipc
+                        todo!()
+                    }
+                    _ => return Err(VMErrors::InvalidOpcode),
+                }
+            }
+            crate::instructions::DecodedInstruction::JType(jtype) => {
+                match decoded_instruction.opcode {
+                    0b1101111 => {
+                        // Funct3 for jal
+                        // todo!()
+                    }
+                    _ => return Err(VMErrors::InvalidOpcode),
+                }
+            }
         }
 
         Ok(true)

@@ -152,15 +152,15 @@ pub enum DecodedInstruction {
     JType(JType),
 }
 
-pub const REGISTER_CLASS: u32 = 0b0110011; // r
-pub const IMMEDIATE_CLASS: u32 = 0b0010011; // i
-pub const IMMEDIATE_LOAD_CLASS: u32 = 0b0000011; // i
-pub const STORE_CLASS: u32 = 0b0100011; // s
-pub const BRANCH_CLASS: u32 = 0b1100011; // b
-pub const JAL_CLASS: u32 = 0b1101111; // j
-pub const JALR_CLASS: u32 = 0b1100111; // i
-pub const UPPER_IMMEDIATE_CLASS: u32 = 0b0110111; // u
-pub const ENVIRONMENT_CLASS: u32 = 0b1110011; // i
+pub const REGISTER_CLASS: u32 = 0b0110011;
+pub const IMMEDIATE_CLASS: u32 = 0b0010011;
+pub const IMMEDIATE_LOAD_CLASS: u32 = 0b0000011;
+pub const STORE_CLASS: u32 = 0b0100011;
+pub const BRANCH_CLASS: u32 = 0b1100011;
+pub const JAL_CLASS: u32 = 0b1101111;
+pub const JALR_CLASS: u32 = 0b1100111;
+pub const UPPER_IMMEDIATE_CLASS: u32 = 0b0110111;
+pub const ENVIRONMENT_CLASS: u32 = 0b1110011;
 
 #[derive(Debug, Clone)]
 pub struct InstructionDecoder {
