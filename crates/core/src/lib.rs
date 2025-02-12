@@ -101,7 +101,7 @@ impl Registers {
 impl Memory {
     pub fn new() -> Self {
         Memory {
-            memory: vec![0; (MAXIMUM_MEMORY_SIZE / 4) as usize],
+            memory: vec![0; MAXIMUM_MEMORY_SIZE as usize],
         }
     }
 

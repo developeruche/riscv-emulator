@@ -4,6 +4,7 @@
 members = [
     "bins/*",
     "crates/*",
+    "integration-testing"
 ]
 
 

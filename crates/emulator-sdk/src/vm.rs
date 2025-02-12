@@ -40,7 +40,7 @@ impl Vm {
     /// # Errors
     /// This function may return an error if the ELF is not valid.
     pub fn from_bin_elf(path: String) -> Result<Self, anyhow::Error> {
-        let mut file = BufReader::new(File::open(path).unwrap());
+        let mut file = BufReader::new(File::open(path)?);
         let mut buf = vec![];
         file.read_to_end(&mut buf).unwrap();
 

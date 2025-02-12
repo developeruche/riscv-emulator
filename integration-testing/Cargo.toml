@@ -1,0 +1,10 @@
+[package]
+name = "integration-testing"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+core.workspace = true
+elf-parser = {path = "../crates/elf-parser"}
+anyhow.workspace = true
+emulator-sdk = {path = "../crates/emulator-sdk"}
