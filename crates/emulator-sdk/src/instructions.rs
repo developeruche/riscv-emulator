@@ -27,6 +27,13 @@ pub struct IType {
     pub rs1: usize,
     pub funct3: u32,
     pub rd: usize,
+    pub metadata: ImmAmountMetadata,
+}
+
+#[derive(Debug, Clone, PartialEq, Default)]
+pub struct ImmAmountMetadata {
+    pub funct7: u32,
+    pub imm_shift_amt: u32,
 }
 
 impl IType {
@@ -39,11 +46,27 @@ impl IType {
             uimm
         };
 
+        let opcode = insn & 0x7f;
+        let funct3 = (insn >> 12) & 0x7;
+        if opcode == 0b0010011 && (funct3 == 0b001 || funct3 == 0b101) {
+            return IType {
+                imm,
+                rs1: ((insn >> 15) & 0x1f) as usize,
+                funct3,
+                rd: ((insn >> 7) & 0x1f) as usize,
+                metadata: ImmAmountMetadata {
+                    funct7: (insn >> 25) & 0x7f,
+                    imm_shift_amt: (imm as u32) & 0x1f,
+                },
+            };
+        }
+
         IType {
             imm,
             rs1: ((insn >> 15) & 0x1f) as usize,
-            funct3: (insn >> 12) & 0x7,
+            funct3,
             rd: ((insn >> 7) & 0x1f) as usize,
+            metadata: ImmAmountMetadata::default(),
         }
     }
 }

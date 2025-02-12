@@ -301,7 +301,6 @@ impl Vm {
                             _ => return Err(VMErrors::InvalidOpcode),
                         }
                     }
-
                     _ => return Err(VMErrors::InvalidOpcode),
                 }
             }
@@ -312,31 +311,90 @@ impl Vm {
                         match itype.funct3 {
                             0b000 => {
                                 // Funct3 for addi
-                                todo!()
+                                let rs1 = self.registers.read_reg(itype.rs1 as u32);
+                                let imm = itype.imm as u32;
+                                let rd = rs1.wrapping_add(imm);
+                                self.registers.write_reg(itype.rd as u32, rd);
+                                self.pc += 4;
+                                Ok(true)
+                            }
+                            0b001 => {
+                                // Funct3 for slli
+                                let rs1 = self.registers.read_reg(itype.rs1 as u32);
+                                let imm = itype.metadata.imm_shift_amt;
+                                let rd = rs1.wrapping_shl(imm);
+                                self.registers.write_reg(itype.rd as u32, rd);
+                                self.pc += 4;
+                                Ok(true)
                             }
                             0b010 => {
                                 // Funct3 for slti
-                                todo!()
+                                let rs1 = self.registers.read_reg(itype.rs1 as u32) as i32;
+                                let imm = itype.imm as i32;
+                                let rd = if rs1 < imm { 1 } else { 0 };
+                                self.registers.write_reg(itype.rd as u32, rd);
+                                self.pc += 4;
+                                Ok(true)
                             }
                             0b011 => {
                                 // Funct3 for sltiu
-                                todo!()
+                                let rs1 = self.registers.read_reg(itype.rs1 as u32);
+                                let imm = itype.imm as u32;
+                                let rd = if rs1 < imm { 1 } else { 0 };
+                                self.registers.write_reg(itype.rd as u32, rd);
+                                self.pc += 4;
+                                Ok(true)
                             }
                             0b100 => {
                                 // Funct3 for xori
-                                todo!()
+                                let rs1 = self.registers.read_reg(itype.rs1 as u32);
+                                let imm = itype.imm as u32;
+                                let rd = rs1 ^ imm;
+                                self.registers.write_reg(itype.rd as u32, rd);
+                                self.pc += 4;
+                                Ok(true)
                             }
                             0b101 => {
                                 // Funct3 for srli, srai
-                                todo!()
+                                match itype.metadata.funct7 {
+                                    0b0000000 => {
+                                        // Funct7 for srli
+                                        let rs1 = self.registers.read_reg(itype.rs1 as u32);
+                                        let imm = itype.metadata.imm_shift_amt;
+                                        let rd = rs1.wrapping_shr(imm);
+                                        self.registers.write_reg(itype.rd as u32, rd);
+                                        self.pc += 4;
+                                        Ok(true)
+                                    }
+                                    0b0100000 => {
+                                        // Funct7 for srai
+                                        let rs1 = self.registers.read_reg(itype.rs1 as u32) as i32;
+                                        let imm = itype.metadata.imm_shift_amt;
+                                        let rd = rs1.wrapping_shr(imm) as u32;
+                                        self.registers.write_reg(itype.rd as u32, rd);
+                                        self.pc += 4;
+                                        Ok(true)
+                                    }
+                                    _ => return Err(VMErrors::InvalidOpcode),
+                                }
                             }
                             0b110 => {
                                 // Funct3 for ori
-                                todo!()
+                                let rs1 = self.registers.read_reg(itype.rs1 as u32);
+                                let imm = itype.imm as u32;
+                                let rd = rs1 | imm;
+                                self.registers.write_reg(itype.rd as u32, rd);
+                                self.pc += 4;
+                                Ok(true)
                             }
                             0b111 => {
                                 // Funct3 for andi
-                                todo!()
+                                let rs1 = self.registers.read_reg(itype.rs1 as u32);
+                                let imm = itype.imm as u32;
+                                let rd = rs1 & imm;
+                                self.registers.write_reg(itype.rd as u32, rd);
+                                self.pc += 4;
+                                Ok(true)
                             }
                             _ => return Err(VMErrors::InvalidOpcode),
                         }
@@ -444,7 +502,9 @@ impl Vm {
                 match decoded_instruction.opcode {
                     0b1101111 => {
                         // Funct3 for jal
-                        todo!()
+                        self.pc += 4;
+                        self.pc += jtype.imm as u32;
+                        Ok(true)
                     }
                     _ => return Err(VMErrors::InvalidOpcode),
                 }
