@@ -14,8 +14,8 @@ pub fn process_load_to_reg(
 
     let align_mask = match mem_chuck_size {
         MemoryChuckSize::BYTE => 0x0,
-        MemoryChuckSize::HALF_WORD => 0x1,
-        MemoryChuckSize::WORD_SIZE => 0x3,
+        MemoryChuckSize::HalfWord => 0x1,
+        MemoryChuckSize::WordSize => 0x3,
     };
 
     if (addr & align_mask) != 0x0 {
@@ -32,8 +32,8 @@ pub fn process_load_to_reg(
     if is_signed {
         load_data = (match mem_chuck_size {
             MemoryChuckSize::BYTE => (load_data as i8) as i32,
-            MemoryChuckSize::HALF_WORD => (load_data as i16) as i32,
-            MemoryChuckSize::WORD_SIZE => load_data as i32,
+            MemoryChuckSize::HalfWord => (load_data as i16) as i32,
+            MemoryChuckSize::WordSize => load_data as i32,
         }) as u32;
     }
 
@@ -56,8 +56,8 @@ pub fn process_store_to_memory(
 
     let align_mask = match mem_chuck_size {
         MemoryChuckSize::BYTE => 0x0,
-        MemoryChuckSize::HALF_WORD => 0x1,
-        MemoryChuckSize::WORD_SIZE => 0x3,
+        MemoryChuckSize::HalfWord => 0x1,
+        MemoryChuckSize::WordSize => 0x3,
     };
 
     if (addr & align_mask) != 0x0 {

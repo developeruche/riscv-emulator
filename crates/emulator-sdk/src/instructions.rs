@@ -184,6 +184,7 @@ pub const JAL_CLASS: u32 = 0b1101111;
 pub const JALR_CLASS: u32 = 0b1100111;
 pub const UPPER_IMMEDIATE_CLASS: u32 = 0b0110111;
 pub const ENVIRONMENT_CLASS: u32 = 0b1110011;
+pub const UPPER_IMMEDIATE_TO_PC_CLASS: u32 = 0b0010111;
 
 #[derive(Debug, Clone)]
 pub struct InstructionDecoder {
@@ -231,7 +232,7 @@ impl InstructionDecoder {
                     opcode,
                 });
             }
-            UPPER_IMMEDIATE_CLASS => {
+            UPPER_IMMEDIATE_CLASS | UPPER_IMMEDIATE_TO_PC_CLASS => {
                 let decoded_instruction = DecodedInstruction::UType(UType::new(*instruction));
                 return Ok(Self {
                     decoded_instruction,
@@ -239,7 +240,34 @@ impl InstructionDecoder {
                 });
             }
             ENVIRONMENT_CLASS => Err(VMErrors::EnvironmentError),
-            _ => Err(VMErrors::InvalidOpcode),
+            _ => Err(VMErrors::InvalidOpcode(opcode)),
+        }
+    }
+
+    pub fn to_string(&self) -> String {
+        match &self.decoded_instruction {
+            DecodedInstruction::RType(r) => format!(
+                "RType: funct7: {}, rs2: {}, rs1: {}, funct3: {}, rd: {}",
+                r.funct7, r.rs2, r.rs1, r.funct3, r.rd
+            ),
+            DecodedInstruction::IType(i) => format!(
+                "IType: imm: {}, rs1: {}, funct3: {}, rd: {}",
+                i.imm, i.rs1, i.funct3, i.rd
+            ),
+            DecodedInstruction::SType(s) => format!(
+                "SType: imm: {}, rs2: {}, rs1: {}, funct3: {}",
+                s.imm, s.rs2, s.rs1, s.funct3
+            ),
+            DecodedInstruction::BType(b) => format!(
+                "BType: imm: {}, rs2: {}, rs1: {}, funct3: {}",
+                b.imm, b.rs2, b.rs1, b.funct3
+            ),
+            DecodedInstruction::UType(u) => {
+                format!("UType: imm: {}, rd: {}", u.imm, u.rd)
+            }
+            DecodedInstruction::JType(j) => {
+                format!("JType: imm: {}, rd: {}", j.imm, j.rd)
+            }
         }
     }
 }

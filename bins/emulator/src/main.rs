@@ -1,3 +1,22 @@
+use clap::Parser;
+use emulator_sdk::vm::Vm;
+use std::path::PathBuf;
+
+/// CLI tool for processing RISC-V ELF binaries
+#[derive(Parser)]
+#[command(
+    name = "riscv-elf-emulator",
+    version = "1.0",
+    about = "RISC-V IM32 Emulator running any corresponding ELF binary"
+)]
+struct Cli {
+    /// Path to the RISC-V ELF binary
+    path: PathBuf,
+}
+
 fn main() {
-    println!("Hello, world!");
+    let args = Cli::parse();
+    let mut vm =
+        Vm::from_bin_elf(args.path.to_str().unwrap().to_string()).expect("Failed to init VM");
+    vm.run(true);
 }

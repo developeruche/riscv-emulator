@@ -15,10 +15,12 @@ pub enum VMErrors {
     InvalidInstruction,
     InvalidMemoryAccess,
     EnvironmentError,
-    InvalidOpcode,
+    InvalidOpcode(u32),
     MemoryError,
     MemoryLoadError,
     MemoryStoreError,
+    InvalidFunct7(u32),
+    InvalidFunct3(u32),
 }
 
 #[derive(Debug, Clone)]
@@ -52,6 +54,10 @@ impl Vm {
 
         let program_elf_decoded = Elf::decode(&buf)?;
 
+        // println!("{:?}", program_elf_decoded.instructions);
+        println!("{:?}", program_elf_decoded.pc_base);
+        println!("{:?}", program_elf_decoded.pc_start);
+
         Ok(Self {
             registers: Registers::new(),
             memory: Memory::new_with_load_program(
@@ -70,15 +76,19 @@ impl Vm {
     /// If the instruction is a jump, the program counter will be updated accordingly.
     /// If the instruction is a syscall, the program will be halted.
     /// If the instruction is a halt, the program will be halted.
-    pub fn step(&mut self) -> Result<bool, VMErrors> {
+    pub fn step(&mut self, debug_mode: bool) -> Result<bool, VMErrors> {
         // Fetch the instruction from memory
         let instruction = self
             .memory
-            .read_mem(self.pc, MemoryChuckSize::WORD_SIZE)
+            .read_mem(self.pc, MemoryChuckSize::WordSize)
             .ok_or(VMErrors::InvalidMemoryAccess)?;
 
         // Decode the instruction
         let decoded_instruction = InstructionDecoder::decode(&instruction)?;
+
+        if debug_mode {
+            println!("{}", decoded_instruction.to_string());
+        }
 
         // Execute the instruction
         match decoded_instruction.decoded_instruction {
@@ -114,7 +124,7 @@ impl Vm {
                                 self.pc += 4;
                                 Ok(true)
                             }
-                            _ => return Err(VMErrors::InvalidOpcode),
+                            _ => return Err(VMErrors::InvalidFunct7(rtype.funct7)),
                         }
                     }
                     0b001 => {
@@ -140,7 +150,7 @@ impl Vm {
                                 self.pc += 4;
                                 Ok(true)
                             }
-                            _ => return Err(VMErrors::InvalidOpcode),
+                            _ => return Err(VMErrors::InvalidFunct7(rtype.funct7)),
                         }
                     }
                     0b010 => {
@@ -165,7 +175,7 @@ impl Vm {
                                 self.pc += 4;
                                 Ok(true)
                             }
-                            _ => return Err(VMErrors::InvalidOpcode),
+                            _ => return Err(VMErrors::InvalidFunct7(rtype.funct7)),
                         }
                     }
                     0b011 => {
@@ -189,7 +199,7 @@ impl Vm {
                                 self.pc += 4;
                                 Ok(true)
                             }
-                            _ => return Err(VMErrors::InvalidOpcode),
+                            _ => return Err(VMErrors::InvalidFunct7(rtype.funct7)),
                         }
                     }
                     0b100 => {
@@ -217,7 +227,7 @@ impl Vm {
                                 self.pc += 4;
                                 Ok(true)
                             }
-                            _ => return Err(VMErrors::InvalidOpcode),
+                            _ => return Err(VMErrors::InvalidFunct7(rtype.funct7)),
                         }
                     }
                     0b101 => {
@@ -250,7 +260,7 @@ impl Vm {
                                 self.pc += 4;
                                 Ok(true)
                             }
-                            _ => return Err(VMErrors::InvalidOpcode),
+                            _ => return Err(VMErrors::InvalidFunct7(rtype.funct7)),
                         }
                     }
                     0b110 => {
@@ -278,7 +288,7 @@ impl Vm {
                                 self.pc += 4;
                                 Ok(true)
                             }
-                            _ => return Err(VMErrors::InvalidOpcode),
+                            _ => return Err(VMErrors::InvalidFunct7(rtype.funct7)),
                         }
                     }
                     0b111 => {
@@ -302,10 +312,10 @@ impl Vm {
                                 self.pc += 4;
                                 Ok(true)
                             }
-                            _ => return Err(VMErrors::InvalidOpcode),
+                            _ => return Err(VMErrors::InvalidFunct7(rtype.funct7)),
                         }
                     }
-                    _ => return Err(VMErrors::InvalidOpcode),
+                    _ => return Err(VMErrors::InvalidFunct3(rtype.funct3)),
                 }
             }
             crate::instructions::DecodedInstruction::IType(itype) => {
@@ -379,7 +389,9 @@ impl Vm {
                                         self.pc += 4;
                                         Ok(true)
                                     }
-                                    _ => return Err(VMErrors::InvalidOpcode),
+                                    _ => {
+                                        return Err(VMErrors::InvalidFunct7(itype.metadata.funct7))
+                                    }
                                 }
                             }
                             0b110 => {
@@ -400,7 +412,7 @@ impl Vm {
                                 self.pc += 4;
                                 Ok(true)
                             }
-                            _ => return Err(VMErrors::InvalidOpcode),
+                            _ => return Err(VMErrors::InvalidFunct3(itype.funct3)),
                         }
                     }
                     0b0000011 => {
@@ -422,7 +434,7 @@ impl Vm {
                                 match process_load_to_reg(
                                     self,
                                     &itype,
-                                    MemoryChuckSize::HALF_WORD,
+                                    MemoryChuckSize::HalfWord,
                                     true,
                                 ) {
                                     Ok(_) => {
@@ -437,7 +449,7 @@ impl Vm {
                                 match process_load_to_reg(
                                     self,
                                     &itype,
-                                    MemoryChuckSize::WORD_SIZE,
+                                    MemoryChuckSize::WordSize,
                                     false,
                                 ) {
                                     Ok(_) => {
@@ -467,7 +479,7 @@ impl Vm {
                                 match process_load_to_reg(
                                     self,
                                     &itype,
-                                    MemoryChuckSize::HALF_WORD,
+                                    MemoryChuckSize::HalfWord,
                                     false,
                                 ) {
                                     Ok(_) => {
@@ -477,7 +489,7 @@ impl Vm {
                                     Err(e) => Err(e),
                                 }
                             }
-                            _ => return Err(VMErrors::InvalidOpcode),
+                            _ => return Err(VMErrors::InvalidFunct3(itype.funct3)),
                         }
                     }
                     0b1100111 => {
@@ -495,11 +507,11 @@ impl Vm {
                                 self.pc = dest_addr;
                                 Ok(true)
                             }
-                            _ => return Err(VMErrors::InvalidOpcode),
+                            _ => return Err(VMErrors::InvalidFunct3(itype.funct3)),
                         }
                     }
                     // not handling enviroment calls because it is halted during encoding
-                    _ => return Err(VMErrors::InvalidOpcode),
+                    _ => return Err(VMErrors::InvalidOpcode(decoded_instruction.opcode)),
                 }
             }
             crate::instructions::DecodedInstruction::SType(stype) => {
@@ -516,7 +528,7 @@ impl Vm {
                     }
                     0b001 => {
                         // Funct3 for sh
-                        match process_store_to_memory(self, &stype, MemoryChuckSize::HALF_WORD) {
+                        match process_store_to_memory(self, &stype, MemoryChuckSize::HalfWord) {
                             Ok(_) => {
                                 self.pc += 4;
                                 Ok(true)
@@ -526,7 +538,7 @@ impl Vm {
                     }
                     0b010 => {
                         // Funct3 for sw
-                        match process_store_to_memory(self, &stype, MemoryChuckSize::WORD_SIZE) {
+                        match process_store_to_memory(self, &stype, MemoryChuckSize::WordSize) {
                             Ok(_) => {
                                 self.pc += 4;
                                 Ok(true)
@@ -534,7 +546,7 @@ impl Vm {
                             Err(e) => Err(e),
                         }
                     }
-                    _ => return Err(VMErrors::InvalidOpcode),
+                    _ => return Err(VMErrors::InvalidFunct3(stype.funct3)),
                 }
             }
             crate::instructions::DecodedInstruction::BType(btype) => {
@@ -545,7 +557,8 @@ impl Vm {
                         let rs2 = self.registers.read_reg(btype.rs2 as u32);
 
                         if rs1 == rs2 {
-                            self.pc += btype.imm as u32;
+                            let target = self.pc.wrapping_add(btype.imm as u32);
+                            self.pc = target;
                         } else {
                             self.pc += 4;
                         }
@@ -558,7 +571,8 @@ impl Vm {
                         let rs2 = self.registers.read_reg(btype.rs2 as u32);
 
                         if rs1 != rs2 {
-                            self.pc += btype.imm as u32;
+                            let target = self.pc.wrapping_add(btype.imm as u32);
+                            self.pc = target;
                         } else {
                             self.pc += 4;
                         }
@@ -571,7 +585,8 @@ impl Vm {
                         let rs2 = self.registers.read_reg(btype.rs2 as u32) as i32;
 
                         if rs1 < rs2 {
-                            self.pc += btype.imm as u32;
+                            let target = self.pc.wrapping_add(btype.imm as u32);
+                            self.pc = target;
                         } else {
                             self.pc += 4;
                         }
@@ -584,7 +599,8 @@ impl Vm {
                         let rs2 = self.registers.read_reg(btype.rs2 as u32) as i32;
 
                         if rs1 >= rs2 {
-                            self.pc += btype.imm as u32;
+                            let target = self.pc.wrapping_add(btype.imm as u32);
+                            self.pc = target;
                         } else {
                             self.pc += 4;
                         }
@@ -597,7 +613,8 @@ impl Vm {
                         let rs2 = self.registers.read_reg(btype.rs2 as u32);
 
                         if rs1 < rs2 {
-                            self.pc += btype.imm as u32;
+                            let target = self.pc.wrapping_add(btype.imm as u32);
+                            self.pc = target;
                         } else {
                             self.pc += 4;
                         }
@@ -610,14 +627,15 @@ impl Vm {
                         let rs2 = self.registers.read_reg(btype.rs2 as u32);
 
                         if rs1 >= rs2 {
-                            self.pc += btype.imm as u32;
+                            let target = self.pc.wrapping_add(btype.imm as u32);
+                            self.pc = target;
                         } else {
                             self.pc += 4;
                         }
 
                         Ok(true)
                     }
-                    _ => return Err(VMErrors::InvalidOpcode),
+                    _ => return Err(VMErrors::InvalidFunct3(btype.funct3)),
                 }
             }
             crate::instructions::DecodedInstruction::UType(utype) => {
@@ -633,11 +651,12 @@ impl Vm {
                         // Funct3 for auipc
                         let imm = utype.imm as u32;
                         let pc = self.pc;
-                        self.registers.write_reg(utype.rd as u32, pc + imm);
+                        self.registers
+                            .write_reg(utype.rd as u32, pc.wrapping_add(imm));
                         self.pc += 4;
                         Ok(true)
                     }
-                    _ => return Err(VMErrors::InvalidOpcode),
+                    _ => return Err(VMErrors::InvalidOpcode(decoded_instruction.opcode)),
                 }
             }
             crate::instructions::DecodedInstruction::JType(jtype) => {
@@ -648,7 +667,7 @@ impl Vm {
                         self.pc += jtype.imm as u32;
                         Ok(true)
                     }
-                    _ => return Err(VMErrors::InvalidOpcode),
+                    _ => return Err(VMErrors::InvalidOpcode(decoded_instruction.opcode)),
                 }
             }
         }
@@ -657,10 +676,10 @@ impl Vm {
     /// Run the Vm.
     /// This function will run the Vm until it halts.
     /// The Vm will halt if the program counter is out of bounds or if the instruction is a halt.
-    pub fn run(&mut self) {
+    pub fn run(&mut self, debug_mode: bool) {
         self.running = true;
         while self.running {
-            match self.step() {
+            match self.step(debug_mode) {
                 Ok(true) => continue,
                 Ok(false) => break,
                 Err(e) => {

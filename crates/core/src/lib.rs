@@ -15,8 +15,8 @@ pub const BYTE: usize = 1;
 #[derive(Debug, Clone)]
 pub enum MemoryChuckSize {
     BYTE,
-    HALF_WORD,
-    WORD_SIZE,
+    HalfWord,
+    WordSize,
 }
 
 #[derive(Debug, Clone)]
@@ -34,8 +34,8 @@ impl MemoryInterface for Memory {
         // Calculate a mask and shift to apply to a 32-bit word to get the required data
         let (shift, mask) = match size {
             MemoryChuckSize::BYTE => (addr & 0x3, 0xff),
-            MemoryChuckSize::HALF_WORD => (addr & 0x2, 0xffff),
-            MemoryChuckSize::WORD_SIZE => (0, 0xffffffff),
+            MemoryChuckSize::HalfWord => (addr & 0x2, 0xffff),
+            MemoryChuckSize::WordSize => (0, 0xffffffff),
         };
 
         if (addr & 0x3) != shift {
@@ -56,8 +56,8 @@ impl MemoryInterface for Memory {
         // Calculate a mask and shift needed to update 32-bit word
         let (shift, mask) = match size {
             MemoryChuckSize::BYTE => (addr & 0x3, 0xff),
-            MemoryChuckSize::HALF_WORD => (addr & 0x2, 0xffff),
-            MemoryChuckSize::WORD_SIZE => (0, 0xffffffff),
+            MemoryChuckSize::HalfWord => (addr & 0x2, 0xffff),
+            MemoryChuckSize::WordSize => (0, 0xffffffff),
         };
 
         if (addr & 0x3) != shift {
