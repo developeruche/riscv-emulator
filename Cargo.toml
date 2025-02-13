@@ -7,7 +7,9 @@ members = [
     "integration-testing"
 ]
 
-
+exclude = [
+    "rust-test"
+]
 
 [workspace.dependencies]
 core = { path = "crates/core" }
