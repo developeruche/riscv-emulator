@@ -541,27 +541,81 @@ impl Vm {
                 match btype.funct3 {
                     0b000 => {
                         // Funct3 for beq
-                        todo!()
+                        let rs1 = self.registers.read_reg(btype.rs1 as u32);
+                        let rs2 = self.registers.read_reg(btype.rs2 as u32);
+
+                        if rs1 == rs2 {
+                            self.pc += btype.imm as u32;
+                        } else {
+                            self.pc += 4;
+                        }
+
+                        Ok(true)
                     }
                     0b001 => {
                         // Funct3 for bne
-                        todo!()
+                        let rs1 = self.registers.read_reg(btype.rs1 as u32);
+                        let rs2 = self.registers.read_reg(btype.rs2 as u32);
+
+                        if rs1 != rs2 {
+                            self.pc += btype.imm as u32;
+                        } else {
+                            self.pc += 4;
+                        }
+
+                        Ok(true)
                     }
                     0b100 => {
                         // Funct3 for blt
-                        todo!()
+                        let rs1 = self.registers.read_reg(btype.rs1 as u32) as i32;
+                        let rs2 = self.registers.read_reg(btype.rs2 as u32) as i32;
+
+                        if rs1 < rs2 {
+                            self.pc += btype.imm as u32;
+                        } else {
+                            self.pc += 4;
+                        }
+
+                        Ok(true)
                     }
                     0b101 => {
                         // Funct3 for bge
-                        todo!()
+                        let rs1 = self.registers.read_reg(btype.rs1 as u32) as i32;
+                        let rs2 = self.registers.read_reg(btype.rs2 as u32) as i32;
+
+                        if rs1 >= rs2 {
+                            self.pc += btype.imm as u32;
+                        } else {
+                            self.pc += 4;
+                        }
+
+                        Ok(true)
                     }
                     0b110 => {
                         // Funct3 for bltu
-                        todo!()
+                        let rs1 = self.registers.read_reg(btype.rs1 as u32);
+                        let rs2 = self.registers.read_reg(btype.rs2 as u32);
+
+                        if rs1 < rs2 {
+                            self.pc += btype.imm as u32;
+                        } else {
+                            self.pc += 4;
+                        }
+
+                        Ok(true)
                     }
                     0b111 => {
                         // Funct3 for bgeu
-                        todo!()
+                        let rs1 = self.registers.read_reg(btype.rs1 as u32);
+                        let rs2 = self.registers.read_reg(btype.rs2 as u32);
+
+                        if rs1 >= rs2 {
+                            self.pc += btype.imm as u32;
+                        } else {
+                            self.pc += 4;
+                        }
+
+                        Ok(true)
                     }
                     _ => return Err(VMErrors::InvalidOpcode),
                 }
