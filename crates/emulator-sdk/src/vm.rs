@@ -1,5 +1,8 @@
 //! This mod holds all the necessary structs and functions to emulate a RISC-V CPU.
-use crate::{instructions::InstructionDecoder, utils::process_load_to_reg};
+use crate::{
+    instructions::InstructionDecoder,
+    utils::{process_load_to_reg, process_store_to_memory},
+};
 use core::{interfaces::MemoryInterface, sign_extend_u32, Memory, MemoryChuckSize, Registers};
 use elf_parser::Elf;
 use std::{
@@ -15,6 +18,7 @@ pub enum VMErrors {
     InvalidOpcode,
     MemoryError,
     MemoryLoadError,
+    MemoryStoreError,
 }
 
 #[derive(Debug, Clone)]
@@ -502,15 +506,33 @@ impl Vm {
                 match stype.funct3 {
                     0b000 => {
                         // Funct3 for sb
-                        todo!()
+                        match process_store_to_memory(self, &stype, MemoryChuckSize::BYTE) {
+                            Ok(_) => {
+                                self.pc += 4;
+                                Ok(true)
+                            }
+                            Err(e) => Err(e),
+                        }
                     }
                     0b001 => {
                         // Funct3 for sh
-                        todo!()
+                        match process_store_to_memory(self, &stype, MemoryChuckSize::HALF_WORD) {
+                            Ok(_) => {
+                                self.pc += 4;
+                                Ok(true)
+                            }
+                            Err(e) => Err(e),
+                        }
                     }
                     0b010 => {
                         // Funct3 for sw
-                        todo!()
+                        match process_store_to_memory(self, &stype, MemoryChuckSize::WORD_SIZE) {
+                            Ok(_) => {
+                                self.pc += 4;
+                                Ok(true)
+                            }
+                            Err(e) => Err(e),
+                        }
                     }
                     _ => return Err(VMErrors::InvalidOpcode),
                 }

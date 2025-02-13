@@ -52,7 +52,7 @@ impl MemoryInterface for Memory {
         Some((read_data >> (shift * 8)) & mask)
     }
 
-    fn write_word(&mut self, addr: u32, size: MemoryChuckSize, value: u32) -> bool {
+    fn write_mem(&mut self, addr: u32, size: MemoryChuckSize, value: u32) -> bool {
         // Calculate a mask and shift needed to update 32-bit word
         let (shift, mask) = match size {
             MemoryChuckSize::BYTE => (addr & 0x3, 0xff),

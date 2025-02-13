@@ -42,3 +42,34 @@ pub fn process_load_to_reg(
 
     Ok(())
 }
+
+pub fn process_store_to_memory(
+    vm: &mut Vm,
+    decoded_instruction: &crate::instructions::SType,
+    mem_chuck_size: MemoryChuckSize,
+) -> Result<(), VMErrors> {
+    let addr = vm
+        .registers
+        .read_reg(decoded_instruction.rs1 as u32)
+        .wrapping_add(decoded_instruction.imm as u32);
+    let data_to_store = vm.registers.read_reg(decoded_instruction.rs2 as u32);
+
+    let align_mask = match mem_chuck_size {
+        MemoryChuckSize::BYTE => 0x0,
+        MemoryChuckSize::HALF_WORD => 0x1,
+        MemoryChuckSize::WORD_SIZE => 0x3,
+    };
+
+    if (addr & align_mask) != 0x0 {
+        return Err(VMErrors::MemoryError);
+    }
+
+    if !vm
+        .memory
+        .write_mem(addr, mem_chuck_size.clone(), data_to_store)
+    {
+        return Err(VMErrors::MemoryStoreError);
+    }
+
+    Ok(())
+}

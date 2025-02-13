@@ -7,5 +7,5 @@ pub trait MemoryInterface {
     fn read_mem(&self, addr: u32, size: MemoryChuckSize) -> Option<u32>;
     /// This function writes a word to the memory
     /// It returns true if the write was successful
-    fn write_word(&mut self, addr: u32, size: MemoryChuckSize, value: u32) -> bool;
+    fn write_mem(&mut self, addr: u32, size: MemoryChuckSize, value: u32) -> bool;
 }
