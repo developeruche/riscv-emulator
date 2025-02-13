@@ -1,5 +1,5 @@
 //! This mod holds all the necessary structs and functions to emulate a RISC-V CPU.
-use crate::instructions::InstructionDecoder;
+use crate::{instructions::InstructionDecoder, utils::process_load_to_reg};
 use core::{interfaces::MemoryInterface, sign_extend_u32, Memory, MemoryChuckSize, Registers};
 use elf_parser::Elf;
 use std::{
@@ -13,6 +13,8 @@ pub enum VMErrors {
     InvalidMemoryAccess,
     EnvironmentError,
     InvalidOpcode,
+    MemoryError,
+    MemoryLoadError,
 }
 
 #[derive(Debug, Clone)]
@@ -73,8 +75,6 @@ impl Vm {
 
         // Decode the instruction
         let decoded_instruction = InstructionDecoder::decode(&instruction)?;
-
-        println!("Decoded Inst: {:?}", decoded_instruction);
 
         // Execute the instruction
         match decoded_instruction.decoded_instruction {
@@ -404,23 +404,74 @@ impl Vm {
                         match itype.funct3 {
                             0b000 => {
                                 // Funct3 for lb
-                                todo!()
+                                match process_load_to_reg(self, &itype, MemoryChuckSize::BYTE, true)
+                                {
+                                    Ok(_) => {
+                                        self.pc += 4;
+                                        Ok(true)
+                                    }
+                                    Err(e) => Err(e),
+                                }
                             }
                             0b001 => {
                                 // Funct3 for lh
-                                todo!()
+                                match process_load_to_reg(
+                                    self,
+                                    &itype,
+                                    MemoryChuckSize::HALF_WORD,
+                                    true,
+                                ) {
+                                    Ok(_) => {
+                                        self.pc += 4;
+                                        Ok(true)
+                                    }
+                                    Err(e) => Err(e),
+                                }
                             }
                             0b010 => {
                                 // Funct3 for lw
-                                todo!()
+                                match process_load_to_reg(
+                                    self,
+                                    &itype,
+                                    MemoryChuckSize::WORD_SIZE,
+                                    false,
+                                ) {
+                                    Ok(_) => {
+                                        self.pc += 4;
+                                        Ok(true)
+                                    }
+                                    Err(e) => Err(e),
+                                }
                             }
                             0b100 => {
                                 // Funct3 for lbu
-                                todo!()
+                                match process_load_to_reg(
+                                    self,
+                                    &itype,
+                                    MemoryChuckSize::BYTE,
+                                    false,
+                                ) {
+                                    Ok(_) => {
+                                        self.pc += 4;
+                                        Ok(true)
+                                    }
+                                    Err(e) => Err(e),
+                                }
                             }
                             0b101 => {
                                 // Funct3 for lhu
-                                todo!()
+                                match process_load_to_reg(
+                                    self,
+                                    &itype,
+                                    MemoryChuckSize::HALF_WORD,
+                                    false,
+                                ) {
+                                    Ok(_) => {
+                                        self.pc += 4;
+                                        Ok(true)
+                                    }
+                                    Err(e) => Err(e),
+                                }
                             }
                             _ => return Err(VMErrors::InvalidOpcode),
                         }
@@ -430,7 +481,15 @@ impl Vm {
                         match itype.funct3 {
                             0b000 => {
                                 // Funct3 for jalr
-                                todo!()
+                                let rs1 = self.registers.read_reg(itype.rs1 as u32);
+                                let imm = itype.imm as u32;
+                                let mut dest_addr = rs1.wrapping_add(imm);
+
+                                // see that dest_addr is even
+                                dest_addr &= 0xfffffffe;
+                                self.registers.write_reg(itype.rd as u32, self.pc + 4);
+                                self.pc = dest_addr;
+                                Ok(true)
                             }
                             _ => return Err(VMErrors::InvalidOpcode),
                         }

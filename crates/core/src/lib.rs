@@ -12,6 +12,7 @@ pub const HALF_WORD: usize = 2;
 pub const BYTE: usize = 1;
 
 /// This defines the different chuck of memory that can be read or written to
+#[derive(Debug, Clone)]
 pub enum MemoryChuckSize {
     BYTE,
     HALF_WORD,

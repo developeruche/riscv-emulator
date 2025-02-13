@@ -9,7 +9,5 @@ fn test_load_elf_program() {
         vm.run();
         assert!(!vm.running);
         assert_eq!(vm.exit_code, 0);
-
-        break;
     }
 }
