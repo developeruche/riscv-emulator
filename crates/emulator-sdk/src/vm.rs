@@ -54,10 +54,6 @@ impl Vm {
 
         let program_elf_decoded = Elf::decode(&buf)?;
 
-        // println!("{:?}", program_elf_decoded.instructions);
-        println!("{:?}", program_elf_decoded.pc_base);
-        println!("{:?}", program_elf_decoded.pc_start);
-
         Ok(Self {
             registers: Registers::new(),
             memory: Memory::new_with_load_program(
