@@ -624,11 +624,18 @@ impl Vm {
                 match decoded_instruction.opcode {
                     0b0110111 => {
                         // Funct3 for lui
-                        todo!()
+                        let imm = utype.imm as u32;
+                        self.registers.write_reg(utype.rd as u32, imm);
+                        self.pc += 4;
+                        Ok(true)
                     }
                     0b0010111 => {
                         // Funct3 for auipc
-                        todo!()
+                        let imm = utype.imm as u32;
+                        let pc = self.pc;
+                        self.registers.write_reg(utype.rd as u32, pc + imm);
+                        self.pc += 4;
+                        Ok(true)
                     }
                     _ => return Err(VMErrors::InvalidOpcode),
                 }
