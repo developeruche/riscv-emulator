@@ -1,5 +1,5 @@
 use clap::Parser;
-use emulator_sdk::vm::Vm;
+use emulator_sdk::{instructions, vm::Vm};
 use std::path::PathBuf;
 
 /// CLI tool for processing RISC-V ELF binaries
@@ -20,3 +20,9 @@ fn main() {
         Vm::from_bin_elf(args.path.to_str().unwrap().to_string()).expect("Failed to init VM");
     vm.run(true);
 }
+
+// fn main() {
+//     let instructions = vec![4028625135];
+//     let mut vm = Vm::from_bin(instructions).unwrap();
+//     vm.run(true);
+// }
