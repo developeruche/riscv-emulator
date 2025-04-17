@@ -65,14 +65,11 @@ impl Vm {
             exit_code: 0,
         })
     }
-    
+
     pub fn from_bin(instructions: Vec<u32>) -> Result<Self, anyhow::Error> {
         Ok(Self {
             registers: Registers::new(),
-            memory: Memory::new_with_load_program(
-                &instructions,
-                0,
-            ),
+            memory: Memory::new_with_load_program(&instructions, 0),
             pc: 0,
             running: false,
             exit_code: 0,
@@ -94,9 +91,14 @@ impl Vm {
 
         // Decode the instruction
         let decoded_instruction = InstructionDecoder::decode(&instruction)?;
-        
-        println!("This is the instruction: {:?} - {} - {:?}", instruction, self.pc, decoded_instruction.to_string());
-        
+
+        println!(
+            "This is the instruction: {:?} - {} - {:?}",
+            instruction,
+            self.pc,
+            decoded_instruction.to_string()
+        );
+
         // if debug_mode {
         //     println!("{}", decoded_instruction.to_string());
         // }
@@ -675,8 +677,7 @@ impl Vm {
                     0b1101111 => {
                         // Funct3 for jal
                         self.pc += 4;
-                        self.registers
-                            .write_reg(jtype.rd as u32, self.pc);
+                        self.registers.write_reg(jtype.rd as u32, self.pc);
                         self.pc += jtype.imm as u32 - 4; // self.pc += imm "not" self.pc = self.pc + 4 + imm
                         Ok(true)
                     }
