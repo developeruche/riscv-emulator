@@ -94,10 +94,12 @@ impl Vm {
 
         // Decode the instruction
         let decoded_instruction = InstructionDecoder::decode(&instruction)?;
-
-        if debug_mode {
-            println!("{}", decoded_instruction.to_string());
-        }
+        
+        println!("This is the instruction: {:?} - {} - {:?}", instruction, self.pc, decoded_instruction.to_string());
+        
+        // if debug_mode {
+        //     println!("{}", decoded_instruction.to_string());
+        // }
 
         // Execute the instruction
         match decoded_instruction.decoded_instruction {
@@ -675,7 +677,7 @@ impl Vm {
                         self.pc += 4;
                         self.registers
                             .write_reg(jtype.rd as u32, self.pc);
-                        self.pc += jtype.imm as u32;
+                        self.pc += jtype.imm as u32 - 4; // self.pc += imm "not" self.pc = self.pc + 4 + imm
                         Ok(true)
                     }
                     _ => return Err(VMErrors::InvalidOpcode(decoded_instruction.opcode)),
