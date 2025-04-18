@@ -22,7 +22,7 @@ fn main() {
 }
 
 // fn main() {
-//     let instructions = vec![4028625135];
+//     let instructions = vec![4278190355, 403, 1049107, 3219491, 3220003, 3220515, 3221027, 3221539, 3222051, 3222563, 4271651];
 //     let mut vm = Vm::from_bin(instructions).unwrap();
 //     vm.run(true);
 // }
